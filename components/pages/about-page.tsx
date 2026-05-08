@@ -143,7 +143,7 @@ export function AboutPage() {
       {/* Footer */}
       <div className="text-center py-4">
         <p className="text-[11px] font-mono" style={{ color: 'rgba(255,255,255,0.25)' }}>
-          Web Section Isolator v1.0.0
+          Web Section Isolator v0.1.0
         </p>
         <p className="text-[11px] font-mono mt-1" style={{ color: 'rgba(255,255,255,0.15)' }}>
           Built with Next.js + TypeScript
