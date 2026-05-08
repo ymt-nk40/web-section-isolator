@@ -242,14 +242,18 @@ export function ExtractorPage() {
 
       case STEP.RESULT:
         return (
-          <div className="space-y-4 pb-24">
-            <div className="grid gap-4 lg:grid-cols-2">
-              <OutputPanel title="Extracted HTML + CSS" content={output} />
-              <PreviewPanel html={output} />
+          <div className="w-full min-w-0 max-w-full space-y-4 overflow-hidden pb-24">
+            <div className="grid w-full min-w-0 max-w-full grid-cols-1 gap-4 lg:grid-cols-2">
+              <OutputPanel title="Extracted HTML + CSS" content={output} className="min-w-0" />
+              <PreviewPanel html={output} className="min-w-0" />
             </div>
 
             {extractedCss && (
-              <OutputPanel title="Extracted CSS Only" content={extractedCss} />
+              <OutputPanel
+                title="Extracted CSS Only"
+                content={extractedCss}
+                className="min-w-0"
+              />
             )}
 
             <div className="flex justify-start pt-4">
@@ -275,7 +279,7 @@ export function ExtractorPage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto w-full min-w-0 max-w-5xl overflow-hidden">
       {/* Top Bar */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <div>
