@@ -1,0 +1,414 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Design Tokens */
+:root {
+  /* Background colors */
+  --background: rgb(14, 14, 14);
+  --background-alt: rgb(18, 18, 18);
+  --foreground: #ffffff;
+  
+  /* Card colors */
+  --card: rgb(22, 22, 22);
+  --card-alt: rgb(28, 28, 28);
+  --card-foreground: #ffffff;
+  
+  /* Popover */
+  --popover: rgb(22, 22, 22);
+  --popover-foreground: #ffffff;
+  
+  /* Primary - Orange accent */
+  --primary: #ff3700;
+  --primary-warm: rgb(255, 94, 0);
+  --primary-foreground: #ffffff;
+  
+  /* Secondary */
+  --secondary: rgba(255, 255, 255, 0.05);
+  --secondary-foreground: rgba(255, 255, 255, 0.5);
+  
+  /* Muted */
+  --muted: rgba(255, 255, 255, 0.08);
+  --muted-foreground: rgba(255, 255, 255, 0.5);
+  
+  /* Accent - Green for status */
+  --accent: rgba(255, 255, 255, 0.08);
+  --accent-foreground: #ffffff;
+  --green: #1a7a1a;
+  --green-bright: #2ECC71;
+  
+  /* Text hierarchy */
+  --text: #ffffff;
+  --text-sec: rgba(255, 255, 255, 0.5);
+  --text-ter: rgba(255, 255, 255, 0.25);
+  
+  /* Destructive */
+  --destructive: #ff3700;
+  --destructive-foreground: #ffffff;
+  
+  /* Border & Input */
+  --border: rgba(255, 255, 255, 0.07);
+  --border-bright: rgba(255, 255, 255, 0.12);
+  --input: rgb(22, 22, 22);
+  --ring: #ff3700;
+  
+  /* Surface glass */
+  --surface-glass: rgba(255, 255, 255, 0.05);
+  --surface-glass-strong: rgba(255, 255, 255, 0.08);
+  
+  /* Charts */
+  --chart-1: #ff3700;
+  --chart-2: #2ECC71;
+  --chart-3: rgba(255, 255, 255, 0.25);
+  --chart-4: rgb(255, 94, 0);
+  --chart-5: rgba(255, 255, 255, 0.15);
+  
+  /* Radius Tokens */
+  --radius: 8px;
+  --r-outer: 24px;
+  --r-inner: 33px;
+  --r-btn: 154px;
+  --r-pill: 999px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  
+  /* Sidebar */
+  --sidebar: rgb(22, 22, 22);
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ff3700;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(255, 255, 255, 0.08);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.07);
+  --sidebar-ring: #ff3700;
+  
+  /* Shadow Tokens */
+  --shadow-btn:
+    0.56px 0.56px 1.76px -0.4px rgba(0,0,0,.4),
+    1.44px 1.44px 4.5px -0.8px rgba(0,0,0,.4),
+    2.9px 2.9px 9px -1.25px rgba(0,0,0,.4),
+    5.5px 5.5px 17px -1.6px rgba(0,0,0,.4),
+    10.9px 10.9px 34px -2px rgba(0,0,0,.4),
+    24px 24px 74px -2.5px rgba(0,0,0,.4),
+    inset 0px -8px 24px 0px rgba(0,0,0,.6);
+  --shadow-card:
+    0 0 0 1px rgba(255,255,255,0.06),
+    0 4px 24px rgba(0,0,0,0.3);
+  --shadow-float:
+    0 2px 20px rgba(0,0,0,0.4);
+  
+  /* Easing Tokens */
+  --ease: cubic-bezier(0.44, 0, 0.56, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-back: cubic-bezier(0.33, 1.53, 0.69, 0.99);
+}
+
+/* No light mode - always dark */
+.dark {
+  --background: rgb(14, 14, 14);
+  --foreground: #ffffff;
+  --card: rgb(22, 22, 22);
+  --card-foreground: #ffffff;
+  --popover: rgb(22, 22, 22);
+  --popover-foreground: #ffffff;
+  --primary: #ff3700;
+  --primary-foreground: #ffffff;
+  --secondary: rgba(255, 255, 255, 0.05);
+  --secondary-foreground: rgba(255, 255, 255, 0.5);
+  --muted: rgba(255, 255, 255, 0.08);
+  --muted-foreground: rgba(255, 255, 255, 0.5);
+  --accent: rgba(255, 255, 255, 0.08);
+  --accent-foreground: #ffffff;
+  --destructive: #ff3700;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.07);
+  --input: rgb(22, 22, 22);
+  --ring: #ff3700;
+  --chart-1: #ff3700;
+  --chart-2: #2ECC71;
+  --chart-3: rgba(255, 255, 255, 0.25);
+  --chart-4: rgb(255, 94, 0);
+  --chart-5: rgba(255, 255, 255, 0.15);
+  --sidebar: rgb(22, 22, 22);
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ff3700;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(255, 255, 255, 0.08);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.07);
+  --sidebar-ring: #ff3700;
+}
+
+@theme inline {
+  --font-sans: 'Inter Tight', 'Inter', system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-mono: 'Fragment Mono', 'JetBrains Mono', monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Noise grain overlay */
+.noise {
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 180px;
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 9990;
+}
+
+/* Custom scrollbar */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+html::-webkit-scrollbar {
+  width: 6px;
+}
+
+html::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+/* Selection color */
+::selection {
+  background: rgba(255, 55, 0, 0.25);
+}
+
+/* Card animations */
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-card-in {
+  animation: cardIn 0.6s var(--ease-spring) forwards;
+}
+
+/* Progress bar animation */
+@keyframes fillBar {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Ping animation for status dots */
+@keyframes ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+/* Code output styles */
+.output-box {
+  background: rgb(22, 22, 22);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--r-outer);
+  padding: 20px;
+  overflow-x: auto;
+  white-space: pre;
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.7);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* Chip styles */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: var(--r-pill);
+  padding: 3px 10px;
+  font-size: 11px;
+  margin: 3px;
+  font-family: 'Fragment Mono', monospace;
+}
+
+.chip::before {
+  content: '.';
+  color: #ff3700;
+  font-weight: 700;
+}
+
+/* Upload zone */
+.upload-zone {
+  border: 2px dashed rgba(255, 255, 255, 0.12);
+  border-radius: var(--r-outer);
+  padding: 32px;
+  text-align: center;
+  transition: all 0.2s var(--ease);
+  cursor: pointer;
+}
+
+.upload-zone:hover,
+.upload-zone.drag-over {
+  border-color: #ff3700;
+  background: rgba(255, 55, 0, 0.05);
+}
+
+/* Preview iframe container */
+.preview-container {
+  background: #fff;
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.preview-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Mobile header */
+.mobile-header {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: rgb(22, 22, 22);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 14px 20px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Sidebar overlay */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 150;
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.sidebar-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .mobile-header {
+    display: flex;
+  }
+  
+  .sidebar-overlay {
+    display: block;
+  }
+}
+
+/* Glass card effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(40px);
+  border-radius: var(--r-outer);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 12px 16px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Nav badge */
+.nav-badge {
+  margin-left: auto;
+  background: #ff3700;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--r-pill);
+  font-family: 'Fragment Mono', monospace;
+}
+
+/* Status badge */
+.status-active {
+  background: rgba(46, 204, 113, 0.12);
+  color: #2ECC71;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2ECC71;
+}
+
+.status-dot-ping::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: rgba(46, 204, 113, 0.2);
+  animation: ping 2s ease-out infinite;
+}

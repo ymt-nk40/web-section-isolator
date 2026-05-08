@@ -1,0 +1,132 @@
+Web Section Isolator
+
+Extract reusable HTML sections from exported websites with only the CSS they actually need.
+
+Built for frontend developers, designers, Webflow exports, Framer exports, landing page cleanup workflows, and reusable section extraction.
+
+⸻
+
+Features
+
+Web Section Isolator
+
+* Upload exported HTML files
+* Upload CSS files
+* Detect sections automatically
+* Extract a selected section
+* Filter related CSS
+* Generate clean standalone output
+* Live responsive preview
+* Copy formatted output
+* Download isolated HTML files
+
+CSS Class Extractor
+
+* Paste class names manually
+* Extract class names from HTML snippets
+* Paste full CSS files
+* Extract only matching CSS rules
+* Supports:
+    * grouped selectors
+    * @media
+    * @supports
+* Outputs clean isolated CSS
+
+Design System
+
+* Custom design token system
+* Shared typography, spacing, radius, colors, and motion
+* Responsive dashboard-style UI
+* Dark theme interface
+* Sidebar navigation
+* Mobile drawer support
+
+⸻
+
+Tech Stack
+
+* React
+* TypeScript
+* Next.js
+* CSS Variables
+* Lucide Icons
+* Vercel Deployment
+
+⸻
+
+Use Cases
+
+* Webflow export cleanup
+* Framer export cleanup
+* Landing page extraction
+* Standalone section exports
+* Component isolation
+* CSS cleanup workflows
+* Design token reference systems
+
+⸻
+
+Project Structure
+
+app/
+components/
+components/layout/
+components/pages/
+components/extractor/
+lib/
+public/
+
+⸻
+
+Development
+
+Install dependencies:
+
+npm install
+
+Run development server:
+
+npm run dev
+
+Build production app:
+
+npm run build
+
+⸻
+
+Deployment
+
+This project is optimized for:
+
+* Vercel
+* GitHub
+* Custom domains
+
+⸻
+
+Roadmap
+
+* Multiple CSS file support
+* ZIP export
+* Smarter CSS dependency tracing
+* Save extraction history
+* Export presets
+* Tailwind conversion helpers
+* Design token editor
+* AI-assisted extraction workflows
+
+⸻
+
+Author
+
+Built by Ye Min Thu
+NiiCk Studio
+
+* Website: https://www.ymthu.com
+* GitHub: https://github.com/ymt-nk40
+
+⸻
+
+License
+
+MIT License
