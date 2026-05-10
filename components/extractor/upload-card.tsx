@@ -61,11 +61,12 @@ export function UploadCard({
   }, []);
 
   return (
-    <div 
-      className="rounded-[24px] p-5 animate-card-in"
-      style={{ 
-        background: 'rgb(22, 22, 22)', 
-        border: '1px solid rgba(255,255,255,0.07)' 
+    <div
+      className="group rounded-[28px] p-5 animate-card-in transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(255,255,255,0.14)]"
+      style={{
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025)), rgb(22, 22, 22)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.22)',
       }}
     >
       <div className="mb-3 flex items-center justify-between">
@@ -108,7 +109,7 @@ export function UploadCard({
       ) : (
         <div
           className={cn(
-            'upload-zone flex flex-col items-center justify-center gap-3 py-8 cursor-pointer'
+            'upload-zone min-h-[220px] flex flex-col items-center justify-center gap-3 py-8 cursor-pointer'
           )}
           style={{
             borderColor: isDragOver ? '#ff3700' : 'rgba(255,255,255,0.12)',
@@ -119,9 +120,9 @@ export function UploadCard({
           onDrop={handleDrop}
           onClick={handleClick}
         >
-          <div 
-            className="w-12 h-12 rounded-[12px] flex items-center justify-center"
-            style={{ background: 'rgba(255,255,255,0.05)' }}
+          <div
+            className="flex h-14 w-14 items-center justify-center rounded-[18px] transition-transform duration-300 group-hover:scale-105"
+            style={{ background: 'rgba(255,255,255,0.06)' }}
           >
             <Upload className="h-5 w-5" style={{ color: 'rgba(255,255,255,0.5)' }} />
           </div>

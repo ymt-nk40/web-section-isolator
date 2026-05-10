@@ -186,8 +186,28 @@
   * {
     @apply border-border outline-ring/50;
   }
+
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-background text-foreground;
+    min-width: 0;
+  }
+
+  :where(pre, code, textarea, iframe) {
+    max-width: 100%;
+  }
+
+  :where(textarea, iframe) {
+    min-width: 0;
+  }
+
+  iframe {
+    display: block;
   }
 }
 
@@ -267,6 +287,8 @@ html::-webkit-scrollbar-thumb {
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: var(--r-outer);
   padding: 20px;
+  max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
   white-space: pre;
   font-size: 13px;
@@ -274,6 +296,11 @@ html::-webkit-scrollbar-thumb {
   color: rgba(255, 255, 255, 0.7);
   max-height: 60vh;
   overflow-y: auto;
+}
+
+.output-box pre,
+.output-box code {
+  white-space: pre;
 }
 
 /* Chip styles */
@@ -317,6 +344,7 @@ html::-webkit-scrollbar-thumb {
 .preview-container {
   background: #fff;
   border-radius: var(--r-md);
+  max-width: 100%;
   overflow: hidden;
 }
 

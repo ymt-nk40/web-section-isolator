@@ -32,13 +32,16 @@ export function App() {
   };
 
   return (
-    <SidebarProvider>
+    <SidebarProvider className="h-dvh overflow-hidden bg-background">
       <AppSidebar currentPage={currentPage} onNavigate={setCurrentPage} />
-      <SidebarInset className="flex flex-col min-h-screen">
+      <SidebarInset className="h-dvh min-w-0 overflow-hidden">
         <AppHeader currentPage={currentPage} />
-        <main 
-          className="flex-1 overflow-auto md:p-8 p-4 pt-[72px] md:pt-8"
-          style={{ background: 'rgb(14, 14, 14)' }}
+        <main
+          className="relative min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 pt-[72px] md:p-8 md:pt-8"
+          style={{
+            background:
+              'radial-gradient(circle at top left, rgba(255,55,0,0.12), transparent 32rem), radial-gradient(circle at bottom right, rgba(46,204,113,0.08), transparent 30rem), rgb(14, 14, 14)',
+          }}
         >
           {renderPage()}
         </main>
