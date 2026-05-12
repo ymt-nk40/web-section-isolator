@@ -51,160 +51,404 @@ export function detectSections(html: string): Section[] {
   return sections;
 }
 
+function escapeRegExp(str: string): string {
+  return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function splitSelectors(selectorText: string): string[] {
+  const selectors: string[] = [];
+  let current = '';
+  let quote: string | null = null;
+  let paren = 0;
+  let bracket = 0;
+
+  for (let x = 0; x < selectorText.length; x++) {
+    const ch = selectorText[x];
+    const prev = selectorText[x - 1];
+
+    if (quote) {
+      current += ch;
+      if (ch === quote && prev !== '\\') quote = null;
+      continue;
+    }
+
+    if (ch === '"' || ch === "'") {
+      quote = ch;
+      current += ch;
+      continue;
+    }
+
+    if (ch === '(') paren++;
+    else if (ch === ')') paren = Math.max(0, paren - 1);
+    else if (ch === '[') bracket++;
+    else if (ch === ']') bracket = Math.max(0, bracket - 1);
+
+    if (ch === ',' && paren === 0 && bracket === 0) {
+      if (current.trim()) selectors.push(current.trim());
+      current = '';
+      continue;
+    }
+
+    current += ch;
+  }
+
+  if (current.trim()) selectors.push(current.trim());
+  return selectors;
+}
+
+function selectorHasTargetClass(selector: string, className: string): boolean {
+  const cls = escapeRegExp(className);
+  const re = new RegExp(`(^|[^\\w-])\\.${cls}(?![\\w-])`);
+  return re.test(selector);
+}
+
+function extractTargetSelectors(selectorText: string, targetSet: Set<string>): string[] {
+  const picked: string[] = [];
+
+  for (const selector of splitSelectors(selectorText)) {
+    for (const target of targetSet) {
+      if (selectorHasTargetClass(selector, target)) {
+        picked.push(selector);
+        break;
+      }
+    }
+  }
+
+  return [...new Set(picked)];
+}
+
 /**
- * Extract CSS rules that match given class names
+ * Extract CSS rules that match given class names.
+ *
+ * This parser keeps matching selectors from grouped rules and supports nested
+ * @media, @supports, @container, @layer, etc. blocks.
  */
 export function extractCSSForClasses(cssText: string, classNames: string[]): string {
-  const targets = classNames
-    .map((c) => c.trim().replace(/^\./, ''))
-    .filter(Boolean);
-
-  if (!targets.length) return '';
-
-  // Build a regex that matches any of the target class names as a CSS class
-  const escapedNames = targets.map((n) =>
-    n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const targetSet = new Set(
+    classNames
+      .map((t) => String(t || '').replace(/^\./, '').trim())
+      .filter(Boolean)
   );
-  const classPattern = new RegExp(
-    `(?<![\\w-])\\.(${escapedNames.join('|')})(?![\\w-])`
-  );
+
+  if (!targetSet.size) return '';
 
   const result: string[] = [];
   let i = 0;
   const len = cssText.length;
 
-  // Helper: skip whitespace
   const skipWS = () => {
     while (i < len && /\s/.test(cssText[i])) i++;
   };
 
-  // Helper: read until matching closing brace (handles nesting)
+  const skipComment = (): boolean => {
+    if (cssText[i] === '/' && cssText[i + 1] === '*') {
+      let end = cssText.indexOf('*/', i + 2);
+      if (end < 0) end = len - 2;
+      i = end + 2;
+      return true;
+    }
+    return false;
+  };
+
+  const readUntilBlockStartOrEnd = (): string => {
+    const start = i;
+    let quote: string | null = null;
+    let paren = 0;
+    let bracket = 0;
+
+    while (i < len) {
+      const ch = cssText[i];
+      const prev = cssText[i - 1];
+
+      if (quote) {
+        i++;
+        if (ch === quote && prev !== '\\') quote = null;
+        continue;
+      }
+
+      if (ch === '"' || ch === "'") {
+        quote = ch;
+        i++;
+        continue;
+      }
+
+      if (ch === '(') paren++;
+      else if (ch === ')') paren = Math.max(0, paren - 1);
+      else if (ch === '[') bracket++;
+      else if (ch === ']') bracket = Math.max(0, bracket - 1);
+
+      if ((ch === '{' || ch === '}' || ch === ';') && paren === 0 && bracket === 0) break;
+      i++;
+    }
+
+    return cssText.slice(start, i).trim();
+  };
+
   const readBlock = (): string => {
     let depth = 0;
     const start = i;
+    let quote: string | null = null;
+
     while (i < len) {
-      if (cssText[i] === '{') depth++;
-      else if (cssText[i] === '}') {
+      const ch = cssText[i];
+      const prev = cssText[i - 1];
+
+      if (quote) {
+        i++;
+        if (ch === quote && prev !== '\\') quote = null;
+        continue;
+      }
+
+      if (ch === '"' || ch === "'") {
+        quote = ch;
+        i++;
+        continue;
+      }
+
+      if (ch === '/' && cssText[i + 1] === '*') {
+        const end = cssText.indexOf('*/', i + 2);
+        if (end < 0) {
+          i = len;
+          break;
+        }
+        i = end + 2;
+        continue;
+      }
+
+      if (ch === '{') {
+        depth++;
+      } else if (ch === '}') {
         depth--;
         if (depth === 0) {
           i++;
           return cssText.slice(start, i);
         }
       }
+
       i++;
     }
+
     return cssText.slice(start, i);
   };
 
-  // Helper: read selector (up to opening brace)
-  const readSelector = (): string => {
-    const start = i;
-    while (i < len && cssText[i] !== '{' && cssText[i] !== '}') i++;
-    return cssText.slice(start, i).trim();
+  const buildRule = (selectorText: string, block: string): string => {
+    const pickedSelectors = extractTargetSelectors(selectorText, targetSet);
+    if (!pickedSelectors.length) return '';
+    return `${pickedSelectors.join(',\n')} ${block.trimEnd()}`;
   };
 
-  while (i < len) {
-    skipWS();
-    if (i >= len) break;
+  const parseRulesUntilClosingBrace = (): string[] => {
+    const collected: string[] = [];
 
-    // Comments
-    if (cssText[i] === '/' && cssText[i + 1] === '*') {
-      let end = cssText.indexOf('*/', i + 2);
-      if (end === -1) end = len - 2;
-      i = end + 2;
-      continue;
-    }
-
-    // @ rules (media, supports, keyframes, layer, container, etc.)
-    if (cssText[i] === '@') {
-      const selector = readSelector();
+    while (i < len) {
       skipWS();
-      if (i >= len) break;
+      while (skipComment()) skipWS();
 
-      // @keyframes, @font-face, @charset, @import – no nested rules with class selectors
-      if (/^@(keyframes|font-face|charset|import|namespace)/i.test(selector)) {
-        if (cssText[i] === '{') {
-          readBlock();
-        } else {
-          // single-line like @import
-          while (i < len && cssText[i] !== ';') i++;
+      if (i >= len) break;
+      if (cssText[i] === '}') {
+        i++;
+        break;
+      }
+
+      if (cssText[i] === '@') {
+        const atRule = readUntilBlockStartOrEnd();
+        skipWS();
+
+        if (!cssText[i]) break;
+        if (cssText[i] === ';') {
           i++;
+          continue;
+        }
+
+        const lower = atRule.toLowerCase();
+        if (
+          lower.startsWith('@keyframes') ||
+          lower.startsWith('@font-face') ||
+          lower.startsWith('@property') ||
+          lower.startsWith('@page')
+        ) {
+          if (cssText[i] === '{') readBlock();
+          continue;
+        }
+
+        if (cssText[i] === '{') {
+          i++;
+          const inner = parseRulesUntilClosingBrace();
+          if (inner.length) {
+            collected.push(
+              `${atRule} {\n${inner
+                .map((rule) => `  ${rule.replace(/\n/g, '\n  ')}`)
+                .join('\n\n')}\n}`
+            );
+          }
         }
         continue;
       }
 
-      // @media, @supports, @container, @layer with block
+      const selectorText = readUntilBlockStartOrEnd();
+      skipWS();
+
+      if (!selectorText) {
+        i++;
+        continue;
+      }
+
+      if (cssText[i] !== '{') {
+        i++;
+        continue;
+      }
+
+      const block = readBlock();
+      const rule = buildRule(selectorText, block);
+      if (rule) collected.push(rule);
+    }
+
+    return collected;
+  };
+
+  while (i < len) {
+    skipWS();
+    while (skipComment()) skipWS();
+
+    if (i >= len) break;
+
+    if (cssText[i] === '@') {
+      const atRule = readUntilBlockStartOrEnd();
+      skipWS();
+
+      if (!cssText[i]) break;
+      if (cssText[i] === ';') {
+        i++;
+        continue;
+      }
+
+      const lower = atRule.toLowerCase();
+      if (
+        lower.startsWith('@keyframes') ||
+        lower.startsWith('@font-face') ||
+        lower.startsWith('@property') ||
+        lower.startsWith('@page')
+      ) {
+        if (cssText[i] === '{') readBlock();
+        continue;
+      }
+
       if (cssText[i] === '{') {
-        i++; // move past {
-        // Collect inner rules that match our classes
-        const innerRules: string[] = [];
-        while (i < len) {
-          skipWS();
-          if (cssText[i] === '}') {
-            i++;
-            break;
-          }
-          if (cssText[i] === '/' && cssText[i + 1] === '*') {
-            let end = cssText.indexOf('*/', i + 2);
-            if (end === -1) end = len - 2;
-            i = end + 2;
-            continue;
-          }
-          const innerSel = readSelector();
-          skipWS();
-          if (i >= len || cssText[i] !== '{') {
-            // malformed, skip
-            while (i < len && cssText[i] !== '}' && cssText[i] !== '{') i++;
-            continue;
-          }
-          const innerBlock = readBlock();
-          if (classPattern.test(innerSel)) {
-            innerRules.push(`  ${innerSel} ${innerBlock.trimEnd()}`);
-          }
-        }
-        if (innerRules.length) {
-          result.push(`${selector} {\n${innerRules.join('\n')}\n}`);
+        i++;
+        const inner = parseRulesUntilClosingBrace();
+        if (inner.length) {
+          result.push(
+            `${atRule} {\n${inner
+              .map((rule) => `  ${rule.replace(/\n/g, '\n  ')}`)
+              .join('\n\n')}\n}`
+          );
         }
       }
       continue;
     }
 
-    // Regular rule
-    const selector = readSelector();
+    const selectorText = readUntilBlockStartOrEnd();
     skipWS();
-    if (i >= len) break;
-    if (cssText[i] !== '{') {
-      // malformed, skip char
+
+    if (!selectorText) {
       i++;
       continue;
     }
-    const block = readBlock();
-    if (classPattern.test(selector)) {
-      result.push(`${selector} ${block.trimEnd()}`);
+
+    if (cssText[i] !== '{') {
+      i++;
+      continue;
     }
+
+    const block = readBlock();
+    const rule = buildRule(selectorText, block);
+    if (rule) result.push(rule);
   }
 
   return result.join('\n\n');
 }
 
 /**
+ * Parse class names from HTML, JSX, or a plain class list.
+ */
+export function parseClassNames(input: string): string[] {
+  const value = String(input || '');
+  const names = new Set<string>();
+
+  const addClassToken = (token: string) => {
+    const clean = String(token || '')
+      .trim()
+      .replace(/^\./, '')
+      .replace(/^class(Name)?=/, '')
+      .replace(/^["'`]+|["'`]+$/g, '')
+      .replace(/[<>]/g, '');
+
+    if (!clean) return;
+
+    clean
+      .split(/\s+/)
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .forEach((item) => {
+        const normalized = item.replace(/^\./, '').replace(/^["'`]+|["'`]+$/g, '');
+        if (normalized && !normalized.includes('=')) names.add(normalized);
+      });
+  };
+
+  const addClassList = (classValue: string | null) => {
+    String(classValue || '')
+      .split(/\s+/)
+      .map((c) => c.trim())
+      .filter(Boolean)
+      .forEach(addClassToken);
+  };
+
+  if (value.includes('<') && /class(Name)?\s*=/.test(value)) {
+    try {
+      const doc = new DOMParser().parseFromString(value, 'text/html');
+      doc.querySelectorAll('[class]').forEach((el) => {
+        addClassList(el.getAttribute('class'));
+      });
+    } catch (err) {
+      console.warn('DOMParser class extraction failed:', err);
+    }
+  }
+
+  let match: RegExpExecArray | null;
+
+  const quotedClassRe = /\bclass\s*=\s*(['"`])([\s\S]*?)\1/g;
+  while ((match = quotedClassRe.exec(value))) addClassList(match[2]);
+
+  const unquotedClassRe = /\bclass\s*=\s*([^\s'"`>]+)/g;
+  while ((match = unquotedClassRe.exec(value))) addClassList(match[1]);
+
+  const quotedClassNameRe = /\bclassName\s*=\s*(['"`])([\s\S]*?)\1/g;
+  while ((match = quotedClassNameRe.exec(value))) addClassList(match[2]);
+
+  const jsxClassNameExprRe = /\bclassName\s*=\s*\{(['"`])([\s\S]*?)\1\}/g;
+  while ((match = jsxClassNameExprRe.exec(value))) addClassList(match[2]);
+
+  if (!names.size || !value.includes('<')) {
+    value
+      .replace(/<[^>]*>/g, ' ')
+      .split(/[\s,\n]+/)
+      .map((c) => c.trim())
+      .filter(Boolean)
+      .forEach(addClassToken);
+  }
+
+  return [...names];
+}
+
+/**
  * Filter CSS to only include rules used by the HTML
  */
 export function filterCSS(css: string, html: string): string {
-  // Extract all class names from HTML
-  const classMatches = html.match(/class=["']([^"']+)["']/gi) || [];
-  const classNames = new Set<string>();
-  
-  classMatches.forEach((match) => {
-    const classes = match.replace(/class=["']/i, '').replace(/["']$/, '');
-    classes.split(/\s+/).forEach((c) => {
-      if (c.trim()) classNames.add(c.trim());
-    });
-  });
+  const classNames = parseClassNames(html);
 
-  if (classNames.size === 0) return css;
+  if (classNames.length === 0) return css;
 
-  return extractCSSForClasses(css, Array.from(classNames));
+  return extractCSSForClasses(css, classNames);
 }
 
 /**
@@ -319,14 +563,4 @@ export function downloadFile(content: string, filename: string, mimeType: string
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
-}
-
-/**
- * Parse class names from input string
- */
-export function parseClassNames(input: string): string[] {
-  return input
-    .split(/[\s,\n]+/)
-    .map((c) => c.trim().replace(/^\./, ''))
-    .filter(Boolean);
 }
