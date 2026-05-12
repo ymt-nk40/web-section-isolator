@@ -123,7 +123,7 @@ This project is optimized for:
 
 Built by Ye Min Thu / NiiCk Studio.
 
-- Website: <https://www.ymthu.com>
+- Website: <https://www.niickht40.me>
 - GitHub: <https://github.com/ymt-nk40>
 
 ## License
