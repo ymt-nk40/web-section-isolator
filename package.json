@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "tsc --noEmit",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "sanity": "sanity",
+    "typegen": "sanity schema extract && sanity typegen generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -59,7 +61,13 @@
     "sonner": "^1.7.1",
     "tailwind-merge": "^3.3.1",
     "vaul": "^1.1.2",
-    "zod": "^3.24.1"
+    "zod": "^3.24.1",
+    "next-sanity": "^9",
+    "sanity": "^3",
+    "@sanity/code-input": "^5",
+    "@sanity/vision": "^3",
+    "@sanity/client": "^6",
+    "@sanity/image-url": "^1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.0",
